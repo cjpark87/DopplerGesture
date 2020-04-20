@@ -11,7 +11,6 @@ import github.nisrulz.zentone.ToneStoppedListener;
 import github.nisrulz.zentone.ZenTone;
 
 public class DopplerRecognizer implements AudioRecorderListener {
-    private static int FREQUENCY = 19000;
     private static int DURATION = 300;
     private static float VOLUME = 1.0f;
 
@@ -31,9 +30,9 @@ public class DopplerRecognizer implements AudioRecorderListener {
         ar.setListener(this);
     }
 
-    public void start() {
+    public void start(int frquency) {
         //start the audio
-        ZenTone.getInstance().generate(FREQUENCY, DURATION, VOLUME, new ToneStoppedListener() {
+        ZenTone.getInstance().generate(frquency, DURATION, VOLUME, new ToneStoppedListener() {
             @Override
             public void onToneStopped() {
                 // Do something when the tone has stopped playing

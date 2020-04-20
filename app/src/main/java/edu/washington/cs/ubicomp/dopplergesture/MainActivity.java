@@ -9,17 +9,21 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
     private static int REQUEST_PERMISSION = 100;
     Button startButton;
     boolean started = false;
     DopplerRecognizer dr;
+    EditText frequencyText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        frequencyText = findViewById(R.id.freq);
 
         dr = new DopplerRecognizer();
 
@@ -51,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRecognition() {
-       dr.start();
+       int freq = Integer.parseInt(frequencyText.getText().toString());
+        dr.start(freq);
     }
 
     private void stopRecognition() {
