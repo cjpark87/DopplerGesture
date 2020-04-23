@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private static int REQUEST_PERMISSION = 100;
@@ -17,6 +18,10 @@ public class MainActivity extends AppCompatActivity {
     boolean started = false;
     DopplerRecognizer dr;
     EditText frequencyText;
+    TextView gestureText;
+    TextView upperFreqText;
+    TextView lowerFreqText;
+    TextView targetFreqText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +29,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         frequencyText = findViewById(R.id.freq);
+        gestureText = findViewById(R.id.gestureText);
+        lowerFreqText = findViewById(R.id.lowerFreqText);
+        upperFreqText = findViewById(R.id.upperFreqText);
+        targetFreqText = findViewById(R.id.targetFreqText);
 
-        dr = new DopplerRecognizer();
+        dr = new DopplerRecognizer(this);
 
         startButton = findViewById(R.id.start);
         startButton.setOnClickListener(new View.OnClickListener() {
