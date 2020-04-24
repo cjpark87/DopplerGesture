@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         frequencyText = findViewById(R.id.freq);
+        frequencyText.setText(Constants.TX_FREQUENCY);
+
         gestureText = findViewById(R.id.gestureText);
         lowerFreqText = findViewById(R.id.lowerFreqText);
         upperFreqText = findViewById(R.id.upperFreqText);

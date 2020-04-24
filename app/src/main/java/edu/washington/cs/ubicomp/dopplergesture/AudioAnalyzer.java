@@ -11,8 +11,6 @@ import be.tarsos.dsp.util.fft.FFT;
 
 public class AudioAnalyzer {
     String TAG = "AudioAnalyzer";
-    int BUFFER_SIZE = 22050;
-    int SAMPLE_RATE = 44100;
     AudioDispatcher dispatcher;
 
     Thread audioAnalyzerThread;
@@ -24,12 +22,12 @@ public class AudioAnalyzer {
     }
 
     public void start (int frequency) {
-        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLE_RATE, BUFFER_SIZE, 0);
-        dispatcher.addAudioProcessor(new BandPass(frequency, 1000, SAMPLE_RATE));
+        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(Constants.SAMPLE_RATE, Constants.BUFFER_SIZE, 0);
+        dispatcher.addAudioProcessor(new BandPass(frequency, 2*Constants.TX_FREQUENCY_BANDWIDTH, Constants.SAMPLE_RATE));
         dispatcher.addAudioProcessor(new AudioProcessor() {
 
-            FFT fft = new FFT(BUFFER_SIZE);
-            final float[] amplitudes = new float[BUFFER_SIZE/2];
+            FFT fft = new FFT(Constants.BUFFER_SIZE);
+            final float[] amplitudes = new float[Constants.BUFFER_SIZE/2];
 
             @Override
             public boolean process(AudioEvent audioEvent) {
@@ -44,19 +42,22 @@ public class AudioAnalyzer {
                 double targetFreq = 0;
 
                 for (int i = 0; i < amplitudes.length; i++) {
-                    if ((int) fft.binToHz(i, SAMPLE_RATE) > 18500 && (int) fft.binToHz(i, SAMPLE_RATE) < 20500) {
+                    if ((int) fft.binToHz(i, Constants.SAMPLE_RATE) > 18500 && (int) fft.binToHz(i, Constants.SAMPLE_RATE) < 20500) {
                         //Log.d(TAG, String.format("Amplitude at %3d Hz: %8.3f", (int) fft.binToHz(i, SAMPLE_RATE) , amplitudes[i]));
                     }
 
-                    if ((int) fft.binToHz(i, SAMPLE_RATE) > 18000 && (int) fft.binToHz(i, SAMPLE_RATE) < 18950) {
+                    if ((int) fft.binToHz(i, Constants.SAMPLE_RATE) > Constants.TX_FREQUENCY - Constants.DOPPLER_SHIFT_FREQUENCY_BANDWIDTH
+                            && (int) fft.binToHz(i, Constants.SAMPLE_RATE) < Constants.TX_FREQUENCY - Constants.TX_FREQUENCY_BANDWIDTH) {
                         lowerFreq += amplitudes[i];
                     }
 
-                    if ((int) fft.binToHz(i, SAMPLE_RATE) >= 18950 && (int) fft.binToHz(i, SAMPLE_RATE) <= 19050) {
+                    if ((int) fft.binToHz(i, Constants.SAMPLE_RATE) >= Constants.TX_FREQUENCY - Constants.DOPPLER_SHIFT_FREQUENCY_BANDWIDTH
+                            && (int) fft.binToHz(i, Constants.SAMPLE_RATE) <= Constants.TX_FREQUENCY + Constants.DOPPLER_SHIFT_FREQUENCY_BANDWIDTH) {
                         targetFreq += amplitudes[i];
                     }
 
-                    if ((int) fft.binToHz(i, SAMPLE_RATE) > 19050 && (int) fft.binToHz(i, SAMPLE_RATE) < 20000) {
+                    if ((int) fft.binToHz(i, Constants.SAMPLE_RATE) > Constants.TX_FREQUENCY + Constants.TX_FREQUENCY_BANDWIDTH
+                            && (int) fft.binToHz(i, Constants.SAMPLE_RATE) < Constants.TX_FREQUENCY + Constants.DOPPLER_SHIFT_FREQUENCY_BANDWIDTH) {
                         upperFreq += amplitudes[i];
                     }
                 }
@@ -71,8 +72,8 @@ public class AudioAnalyzer {
                         mainActivity.upperFreqText.setText(String.format("%.3f", upperFreqFinal));
                         mainActivity.lowerFreqText.setText(String.format("%.3f", lowerFreqFinal));
                         mainActivity.targetFreqText.setText(String.format("%.3f", targetFreqFinal));
-                        if (Math.abs(upperFreqFinal - lowerFreqFinal) > 100)
-                            mainActivity.gestureText.setText(upperFreqFinal > lowerFreqFinal ? "Toward" : "Away");
+                        if (Math.abs(upperFreqFinal - lowerFreqFinal) > Constants.DOPPLER_SHIFT_DIFF_THRESHOLD * Math.min(upperFreqFinal, lowerFreqFinal))
+                            mainActivity.gestureText.setText(upperFreqFinal > lowerFreqFinal ? R.string.push : R.string.pull);
                     }
                 });
 
